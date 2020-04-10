@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+die()
+{
+    echo 1>&2 "ERROR: $*"
+    exit 1
+}
+
+
+mydir="$(dirname "$0")"
+
+build_target_only()
+{
+    "$mydir"/build_kiwix_target --assume-packages-installed \
+                                --skip-source-prepare       \
+                                --build-nodeps              \
+                                "$1"
+}
+
+for t in kiwix-lib kiwix-tools
+do
+    build_target_only "$t" || die "target '$t' failed"
+done
