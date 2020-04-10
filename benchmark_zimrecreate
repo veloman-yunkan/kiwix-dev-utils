@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+mydir=$(dirname "$0")
+mydir=$(cd "$mydir"; pwd)
+
+indir="${1:-zimfiles/orig}"
+outdir="${2:-zimfiles/zstd}"
+
+mkdir -p "$outdir"
+
+rezim=$mydir/BUILD_native_static/INSTALL/bin/zimrecreate
+
+bench_rezim()
+{
+    echo '--------' Rezimming "$1"
+
+    local start_time=$(date +%s)
+    "$rezim" "$1" "$2" &> "$2".rezim.log
+    local end_time=$(date +%s)
+    ls -l "$1" "$2"
+    echo "Runtime: $((end_time - start_time))"
+    echo '------------------'
+}
+
+for f in "$indir"/*.zim
+do
+    bench_rezim "$f" "$outdir"/"$(basename "$f")"
+done
