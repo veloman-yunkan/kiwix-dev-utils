@@ -2,14 +2,19 @@
 
 cd "$(dirname "$0")"
 
+ZIMNAME=wikipedia_en_climate_change_nopic_2020-01
+
 serve()
 {
     BUILD_native_static/INSTALL/bin/kiwix-serve -p 8888 -d -a "$1"\
-            zimfiles/orig/wikipedia_en_climate_change_nopic_2020-01.zim
+            zimfiles/orig/"$ZIMNAME".zim
 }
 
 sleep 5 &
 pid=$!
 serve $pid
 sleep 1
-curl -I http://localhost:8888/wikipedia_en_climate_change_nopic_2020-01/A/Polar_bear
+echo '------- Home page'
+curl -I http://localhost:8888/
+echo '------- An article'
+curl -I http://localhost:8888/"$ZIMNAME"/A/Polar_bear
