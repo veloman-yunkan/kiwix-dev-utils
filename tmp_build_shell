@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+die()
+{
+    echo >&2 "ERROR: $*"
+    exit 1
+}
+
+if [ $# -ne 1 ]
+then
+    echo>&2 "Usage: $myname <subdir>"
+    exit 1
+fi
+
+rename()
+{
+    local src=$1 dest=$2
+    test ! -e "$dest" && mv "$src" "$dest"
+}
+
+subdir=$1
+bakdirname="${subdir}.bak"
+test -d "$subdir" || die "No such subdirectory: $subdir"
+rename "$subdir" "$bakdirname" || die "Cannot rename '$subdir' to '$bakdirname'"
+tmpdir=$(mktemp -d -p "$XDG_RUNTIME_DIR")
+builddir="$tmpdir/$(basename "$subdir")"
+cp -r "$bakdirname" "$builddir"
+ln -s "$builddir" .
+cleanup()
+{
+    rm -rf "$tmpdir"
+    rm "$subdir"
+    mv "$bakdirname" "$subdir" || "Failed to restore the renamed directory '$bakdirname'"
+}
+trap cleanup EXIT
+(cd "$subdir"; bash)
