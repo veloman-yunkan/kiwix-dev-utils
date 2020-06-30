@@ -6,7 +6,6 @@ die()
     exit 1
 }
 
-
 mydir="$(dirname "$0")"
 
 build_target_only()
@@ -17,7 +16,14 @@ build_target_only()
                                 "$1"
 }
 
-for t in kiwix-lib kiwix-tools
+if [ $# -eq 0 ]
+then
+    targets=(kiwix-lib kiwix-tools)
+else
+    targets=("$@")
+fi
+
+for t in "${targets[@]}"
 do
     build_target_only "$t" || die "target '$t' failed"
 done
