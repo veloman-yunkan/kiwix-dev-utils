@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+myname=$(basename "$0")
+
 die()
 {
     echo >&2 "ERROR: $*"
