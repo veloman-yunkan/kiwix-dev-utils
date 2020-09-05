@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+if [ $# -ne 3 ]
+then
+    cat<<END
+Usage: $myname <build_version> <article_count> <zimfile>
+END
+    exit 1
+fi
+
+mydir=$(dirname "$0")
+mydir=$(readlink -f "$mydir")
+
+die()
+{
+    echo 1>&2 "ERROR: $*"
+    exit 1
+}
+
+build_version=$1
+article_count=$2
+zimfile=$(readlink -f $3)
+zimfilename=$(basename "$zimfile")
+
+install_dir="$mydir/BUILD_native_static/INSTALL.$build_version"
+
+zimdump="$install_dir/bin/zimdump"
+kiwix_serve="$install_dir/bin/kiwix-serve"
+
+test -f "$kiwix_serve" && test -x "$kiwix_serve" \
+    || die "$kiwix_serve doesn't exist or is not executable"
+
+test -f "$zimdump" && test -x "$zimdump" \
+    || die "$zimdump doesn't exist or is not executable"
+
+
+outdir="kiwix_serve_benchmark_dir.$build_version"
+rm -rf "$outdir"
+mkdir "$outdir"
+cd "$outdir"
+
+article_url_prefix="http://localhost:8000/${zimfilename%.zim}/A/"
+"$zimdump" list "$zimfile" > all_articles
+total_article_count=$(cat all_articles|wc -l)
+echo "There are a total of $total_article_count articles in $zimfile."
+article_step=$((total_article_count/article_count))
+echo "Will process one of $article_step articles."
+
+filter_articles()
+{
+    sed -n -e "1~$article_step {s|^|$article_url_prefix|; p; }"
+}
+
+cat all_articles|filter_articles > filtered_article_urls
+
+echo "Selected $(cat filtered_article_urls|wc -l) articles"
+
+echo "Starting server..."
+
+"$kiwix_serve" -p 8000 "$zimfile" &> kiwix-serve.log &
+kiwix_serve_pid=$!
+
+cleanup()
+{
+    ps -l "$kiwix_serve_pid"
+    echo "Stopping the server..."
+    kill "$kiwix_serve_pid"
+    ps
+}
+
+trap cleanup EXIT
+
+sleep 1
+
+
+run_benchmark()
+{
+    wget --quiet --recursive -l 1 -i filtered_article_urls
+}
+
+time run_benchmark
