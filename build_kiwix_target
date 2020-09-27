@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
 ulimit -v 5000000
-cd "$(dirname "$0")"
 
 kiwix-build --target-platform native_static "$@"
