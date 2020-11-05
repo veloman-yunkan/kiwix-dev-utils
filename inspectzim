@@ -8,9 +8,18 @@ die()
   exit 1
 }
 
+declare -A options=()
+while [[ "$1" == --* ]]
+do
+  options["${1#--}"]=1
+  shift
+done
+
 if [ "$#" -ne 1 ]
 then
-  echo 1>&2 "Usage: $myname <zimfile>"
+  cat 1>&2 <<END
+Usage: $myname [--cluster_table] [--dirent_ptr_table] [--tile_index] <zimfile>
+END
   exit 1
 fi
 
@@ -57,7 +66,7 @@ dump_cluser_table()
   printf "\n"
 }
 
-dump_dirent_table()
+dump_dirent_ptr_table()
 {
   printf "# DIRENT PTR TABLE\n"
   hexdump -s$((url_ptr_pos)) \
@@ -88,6 +97,15 @@ printf "%s\n\n" "$header"
 
 eval "$(echo "$header"|sed 's/: */=/')"
 
-dump_cluser_table
-dump_dirent_table
-dump_title_index
+if [ "${options['cluster_table']}" == 1 ]
+then
+  dump_cluser_table
+fi
+if [ "${options['dirent_ptr_table']}" == 1 ]
+then
+  dump_dirent_ptr_table
+fi
+if [ "${options['title_index']}" == 1 ]
+then
+  dump_title_index
+fi
