@@ -54,6 +54,17 @@ dump_cluser_table()
           -n$((8*cluster_count)) \
           -e '1/4 "0x%08x+" 1/4 "0x%08x00000000" "\n"' \
           "$zimfile"|restore_64bit_integers
+  printf "\n"
+}
+
+dump_dirent_table()
+{
+  printf "# DIRENT PTR TABLE\n"
+  hexdump -s$((url_ptr_pos)) \
+          -n$((8*article_count)) \
+          -e '1/4 "0x%08x+" 1/4 "0x%08x00000000" "\n"' \
+          "$zimfile"|restore_64bit_integers
+  printf "\n"
 }
 
 magic_number=$(read_magic_number)
@@ -68,3 +79,4 @@ printf "%s\n\n" "$header"
 eval "$(echo "$header"|sed 's/: */=/')"
 
 dump_cluser_table
+dump_dirent_table
