@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+myname=$(basename "$0")
+
+die()
+{
+  echo 1>&2 "ERROR: $*"
+  exit 1
+}
+
+if [ "$#" -ne 1 ]
+then
+  echo 1>&2 "Usage: $myname <zimfile>"
+  exit 1
+fi
+
+zimfile=$1
+
+test -r "$zimfile" || die "cannot read '$zimfile'"
+
+read_magic_number()
+{
+  hexdump -n4 -e '1/4 "%i"' "$zimfile"
+}
+
+restore_64bit_integers()
+{
+  sed -e 's/0x\([[:xdigit:]]\{8\}\)+0x\([[:xdigit:]]\{8\}\)00000000$/0x\2\1/'
+}
+
+read_header()
+{
+  header_format='
+    "major_version:   " 1/2 "%i"                            "\n"
+    "minor_version:   " 1/2 "%i"                            "\n"
+    "uuid:            " 16/1 "%x"                           "\n"
+    "article_count:   " 1/4 "%i"                            "\n"
+    "cluster_count:   " 1/4 "%i"                            "\n"
+    "url_ptr_pos:     " 1/4 "0x%08x+" 1/4 "0x%08x00000000"  "\n"
+    "title_ptr_pos:   " 1/4 "0x%08x+" 1/4 "0x%08x00000000"  "\n"
+    "cluster_ptr_pos: " 1/4 "0x%08x+" 1/4 "0x%08x00000000"  "\n"
+    "mime_list_pos:   " 1/4 "0x%08x+" 1/4 "0x%08x00000000"  "\n"
+    "main_page:       " 1/4 "%i"                            "\n"
+    "layout_page:     " 1/4 "%i"                            "\n"
+    "checksum_pos:    " 1/4 "0x%08x+" 1/4 "0x%08x00000000"  "\n"
+'
+  hexdump -s4 -n76 -e "$header_format" "$zimfile"|restore_64bit_integers
+}
+
+magic_number=$(read_magic_number)
+printf "# HEADER\n"
+printf "magic_number:    $magic_number\n"
+test "$magic_number" == 72173914 || \
+  die "invalid magic number (must be 72173914)"
+
+read_header
