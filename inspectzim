@@ -67,6 +67,16 @@ dump_dirent_table()
   printf "\n"
 }
 
+dump_title_index()
+{
+  printf "# TITLE INDEX\n"
+  hexdump -s$((title_ptr_pos)) \
+          -n$((4*article_count)) \
+          -e '1/4 "%u" "\n"' \
+          "$zimfile"
+  printf "\n"
+}
+
 magic_number=$(read_magic_number)
 printf "# HEADER\n"
 printf "magic_number:    $magic_number\n"
@@ -80,3 +90,4 @@ eval "$(echo "$header"|sed 's/: */=/')"
 
 dump_cluser_table
 dump_dirent_table
+dump_title_index
