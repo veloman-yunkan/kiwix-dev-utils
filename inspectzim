@@ -28,9 +28,9 @@ restore_64bit_integers()
   sed -e 's/0x\([[:xdigit:]]\{8\}\)+0x\([[:xdigit:]]\{8\}\)00000000$/0x\2\1/'
 }
 
-read_header()
+dump_header()
 {
-  header_format='
+  local header_format='
     "major_version:   " 1/2 "%i"                            "\n"
     "minor_version:   " 1/2 "%i"                            "\n"
     "uuid:            " 16/1 "%x"                           "\n"
@@ -47,10 +47,24 @@ read_header()
   hexdump -s4 -n76 -e "$header_format" "$zimfile"|restore_64bit_integers
 }
 
+dump_cluser_table()
+{
+  printf "# CLUSTER PTR TABLE\n"
+  hexdump -s$((cluster_ptr_pos)) \
+          -n$((8*cluster_count)) \
+          -e '1/4 "0x%08x+" 1/4 "0x%08x00000000" "\n"' \
+          "$zimfile"|restore_64bit_integers
+}
+
 magic_number=$(read_magic_number)
 printf "# HEADER\n"
 printf "magic_number:    $magic_number\n"
 test "$magic_number" == 72173914 || \
   die "invalid magic number (must be 72173914)"
 
-read_header
+header=$(dump_header)
+printf "%s\n\n" "$header"
+
+eval "$(echo "$header"|sed 's/: */=/')"
+
+dump_cluser_table
