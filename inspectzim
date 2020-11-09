@@ -18,7 +18,16 @@ done
 if [ "$#" -ne 1 ]
 then
   cat 1>&2 <<END
-Usage: $myname [--cluster_table] [--dirent_ptr_table] [--tile_index] <zimfile>
+Usage:
+
+  $myname [options] <zimfile>
+
+Options:
+
+  --header
+  --dirent_ptr_table
+  --title_index
+  --cluster_table
 END
   exit 1
 fi
@@ -87,15 +96,19 @@ dump_title_index()
 }
 
 magic_number=$(read_magic_number)
-printf "# HEADER\n"
-printf "magic_number:    $magic_number\n"
 test "$magic_number" == 72173914 || \
   die "invalid magic number (must be 72173914)"
 
 header=$(dump_header)
-printf "%s\n\n" "$header"
-
 eval "$(echo "$header"|sed 's/: */=/')"
+
+if [ "${options['header']}" == 1 ]
+then
+  printf "# HEADER\n"
+  printf "magic_number:    $magic_number\n"
+  printf "%s\n\n" "$header"
+fi
+
 
 if [ "${options['cluster_table']}" == 1 ]
 then
