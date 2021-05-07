@@ -24,7 +24,7 @@ subdir=$1
 bakdirname="${subdir}.bak"
 test -d "$subdir" || die "No such subdirectory: $subdir"
 rename "$subdir" "$bakdirname" || die "Cannot rename '$subdir' to '$bakdirname'"
-tmpdir=$(mktemp -d -p "$XDG_RUNTIME_DIR")
+tmpdir=$(mktemp -d -p /dev/shm)
 export TMPDIR=$tmpdir
 builddir="$tmpdir/$(basename "$subdir")"
 cp -r "$bakdirname" "$builddir"
