@@ -36,4 +36,4 @@ cleanup()
     mv "$bakdirname" "$subdir" || "Failed to restore the renamed directory '$bakdirname'"
 }
 trap cleanup EXIT
-(cd "$subdir"; export CCACHE_DISABLE=1; bash)
+(cd "$subdir"; export CCACHE_DISABLE=1; exec bash)
