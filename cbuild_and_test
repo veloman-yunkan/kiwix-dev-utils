@@ -8,12 +8,12 @@ die()
 
 myname=$(basename "$0")
 
-if [ $# -ne 2 ]
+if [ $# -lt 2 ]
 then
     cat<<END
 Usage:
 
-    $myname <mode> <project>
+    $myname <mode> <project> <testargs> ...
 
 Examples:
 
@@ -26,6 +26,8 @@ fi
 
 mode=$1
 project=$2
+shift 2
+testargs=("$@")
 mydir=$(dirname "$0")
 mydir=$(cd "$mydir"; pwd)
 srcdir=$mydir/SOURCE/$project
@@ -38,4 +40,4 @@ source_files=$(find "$srcdir" -name '*.h' -o -name '*.cpp' -o -name meson.build)
 export SKIP_BIG_MEMORY_TEST=1
 ulimit -v 5000000
 
-keep_doing 'meson test -v --timeout-multiplier 0.1' $source_files
+keep_doing "meson test -v --timeout-multiplier 0.1 ${testargs[@]}" $source_files
