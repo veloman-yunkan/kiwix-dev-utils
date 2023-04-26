@@ -40,4 +40,4 @@ source_files=$(find "$srcdir" -name '*.h' -o -name '*.cpp' -o -name meson.build)
 export SKIP_BIG_MEMORY_TEST=1
 ulimit -v 5000000
 
-keep_doing "meson test -v --timeout-multiplier 0.1 ${testargs[@]}" $source_files
+keep_doing "meson test -v --timeout-multiplier 0.1 ${testargs[*]}" $source_files
