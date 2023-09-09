@@ -21,6 +21,9 @@ rename()
 }
 
 subdir=$1
+parentdir=$(dirname "$subdir")
+cd "$parentdir" || die "Cannot cd to directory: $parentdir"
+subdir=$(basename "$subdir")
 bakdirname="${subdir}.bak"
 test -d "$subdir" || die "No such subdirectory: $subdir"
 rename "$subdir" "$bakdirname" || die "Cannot rename '$subdir' to '$bakdirname'"
