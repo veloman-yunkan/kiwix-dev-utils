@@ -2,4 +2,4 @@
 
 ulimit -v 5000000
 
-kiwix-build --target-platform native_static "$@"
+kiwix-build --config native_static "$@"
