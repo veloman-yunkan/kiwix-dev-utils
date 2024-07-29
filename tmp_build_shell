@@ -30,7 +30,7 @@ rename "$subdir" "$bakdirname" || die "Cannot rename '$subdir' to '$bakdirname'"
 tmpdir=$(mktemp -d -p /dev/shm)
 export TMPDIR=$tmpdir
 builddir="$tmpdir/$(basename "$subdir")"
-cp -r "$bakdirname" "$builddir"
+cp -a "$bakdirname" "$builddir"
 ln -s "$builddir" .
 cleanup()
 {
