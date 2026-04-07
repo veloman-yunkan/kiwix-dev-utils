@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+die()
+{
+    echo >&2 "ERROR: $*"
+    exit 1
+}
+
+if [ $# -ne 2 ]
+then
+    echo >&2 "Usage: $(basename "$0") dump7z_filepath ZIM_title"
+    exit
+fi
+
+dumpfpath=$1
+zimtitle=$2
+
+[[ "$dumpfpath" == *.7z ]] || die "not a 7z file: $dumpfpath"
+test -f "$dumpfpath" || die "not such file: $dumpfpath"
+
+dumpfname=$(basename "$dumpfpath")
+
+domain=${dumpfname%.7z}
+
+mkdir "$domain.sotoki_workdir"
+cd "$domain.sotoki_workdir"
+ln -s ../"$dumpfpath"
+
+\time \
+sotoki --without-images \
+       -d "$domain" \
+       --title "$zimtitle" \
+       --description "ZIM file for $domain" \
+       --mirror https://archive.org/download/stackexchange \
+       --output .. \
+       --keep \
+       --build-in-tmp \
+       --tmp-dir="$(pwd)"
