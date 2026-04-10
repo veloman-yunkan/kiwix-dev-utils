@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+ ./corrupt_xapian_db '0' $((0x00069a37))
+ mv ray_charles.corrupted_xapiandb.zim ray_charles.corrupted_ft_xapiandb.zim
+
+ ./corrupt_xapian_db '0' $((0x0004be7d))
+ mv ray_charles.corrupted_xapiandb.zim ray_charles.corrupted_title_xapiandb.zim

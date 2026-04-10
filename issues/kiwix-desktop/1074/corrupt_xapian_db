@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+die()
+{
+  echo >&2 "!!! ERROR: $*"
+  exit 1
+}
+
+encode_integer_as_printf_fmt_string()
+{
+  local i n=$1 size=$2
+  for (( i=0; i<size; ++i ))
+  do
+    printf '\\x%02x' $((n%256))
+    let n=$((n/256))
+  done
+}
+
+encode_uint64()
+{
+  encode_integer_as_printf_fmt_string "$1" 8
+}
+
+encode_uint32()
+{
+  encode_integer_as_printf_fmt_string "$1" 4
+}
+
+encode_uint16()
+{
+  encode_integer_as_printf_fmt_string "$1" 2
+}
+
+overwrite_bytes_in_file()
+{
+  local fname=$1
+  local bytes=$2
+  local offset=$3
+  local nbytes=$(printf "$bytes"|wc -c)
+  printf "$bytes" |
+    dd of="$fname" bs=1 seek=$offset count=$nbytes conv=notrunc &> /dev/null
+}
+
+break_zim_file()
+{
+  local zimfile_path=$1
+  shift
+
+  while [ $# -ne 0 ]
+  do
+    local bytes=$1 offset=$2
+    shift 2
+    overwrite_bytes_in_file "$zimfile_path" "$bytes" "$offset" \
+      || return 1
+  done
+}
+
+broken_zimfile_name=ray_charles.corrupted_xapiandb.zim
+
+cp ray_charles.zim "$broken_zimfile_name" \
+&& break_zim_file "$broken_zimfile_name" "$@" \
+&& echo "$broken_zimfile_name was successfully created" \
+|| die "Failed to create $broken_zimfile_name"
