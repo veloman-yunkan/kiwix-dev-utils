@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+qemu-system-x86_64 -m 512 \
+                   -drive file=alpine-3.22.qcow2 \
+                   -device virtio-net-pci,netdev=net0 \
+                   -netdev user,id=net0,ipv6=off,hostfwd=tcp::2222-:22 \
+                   &
