@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+server_pid=$(pgrep kiwix-serve)
+
+curl -s 'http://localhost:8080/search?content=wikipedia_en_geography_maxi_2025-09&pattern='$1
+ps -o drs,rss,vsz,comm -p "$server_pid"

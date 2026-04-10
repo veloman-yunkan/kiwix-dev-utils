@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+for query in city village river desert island;
+do
+    ./perform_search_request "$query&pageLength=1000"
+done

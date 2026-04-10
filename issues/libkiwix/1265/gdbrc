@@ -1,0 +1,28 @@
+define mycont
+printf "---------------- Before -------------------\n"
+!./report_kiwix-serve_memusage
+finish
+printf "----------------- After -------------------\n"
+!./report_kiwix-serve_memusage
+cont
+end
+
+define mybreak
+break $arg0
+commands
+bt
+#info reg
+mycont
+end
+end
+
+#mybreak brk
+#mybreak sbrk
+mybreak mmap
+#condition 1 $rsi > 10000000
+#mybreak munmap
+#mybreak mremap
+#mybreak alloc_new_heap
+
+set height 0
+run

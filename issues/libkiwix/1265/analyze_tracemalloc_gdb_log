@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+if [ $# -ne 1 ]
+then
+    echo "Usage: $(basename "$0") run_name"
+    exit 1
+fi
+
+runname=$1
+
+log_file_name=gdb.log.tracemalloc."$runname"
+
+mv gdb.log "$log_file_name"
+grep thread# "$log_file_name" | ./analyze_malloc_calls.py  > "$log_file_name".analysis
+

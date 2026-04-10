@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+export LD_LIBRARY_PATH=$(pwd)/BUILD_native_dyn/INSTALL/lib/x86_64-linux-gnu
+ltrace -o ltrace.log -fS -e malloc+free \
+    BUILD_native_dyn/kiwix-tools/src/server/kiwix-serve -t 1 \
+                                                       --port 8080 \
+                                                       wikipedia_en_geography_maxi_2025-09.zim

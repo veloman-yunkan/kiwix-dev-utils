@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+kiwix_serve=$1
+shift
+
+set -x
+"$kiwix_serve" -t 1 --port 8080 wikipedia_en_geography_maxi_2025-09.zim&
+kiwix_serve_pid=$!
+
+cleanup()
+{
+    kill $kiwix_serve_pid
+}
+
+while ! curl -s 'http://localhost:8080/ROOT/viewer_settings.js'
+do
+    echo "Waiting for the server to come online..."
+    sleep 1
+done
+
+trap cleanup EXIT
+
+for flow in "$@"
+do
+    ./"$flow"
+done

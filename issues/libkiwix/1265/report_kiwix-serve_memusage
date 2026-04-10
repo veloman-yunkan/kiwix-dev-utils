@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+pid=$(pgrep kiwix-serve)
+pmap -p $pid
+grep -i 'rss\|vm' /proc/$pid/status
