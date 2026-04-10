@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+$(dirname "$0")/unslow_localhost
+sudo tc qdisc add dev lo root netem rate ${1:-1mbps}

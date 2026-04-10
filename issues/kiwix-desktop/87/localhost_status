@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+tc qdisc show dev lo
