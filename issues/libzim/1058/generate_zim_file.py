@@ -1,10 +1,50 @@
 #!/usr/bin/env python3
 
 import argparse
+import base64
 
 from pathlib import Path
 
-from zimscraperlib.zim import Creator
+import libzim
+from libzim.writer import Creator, StringProvider, Hint
+
+# blank 48x48 transparent PNG
+DEFAULT_ILLUSTRATION = base64.b64decode(
+        "iVBORw0KGgoAAAANSUhEUgAAADAAAAAwAQMAAABtzGvEAAAAGXRFWHRTb2Z0d2FyZQBB"
+        "ZG9iZSBJbWFnZVJlYWR5ccllPAAAAANQTFRFR3BMgvrS0gAAAAF0Uk5TAEDm2GYAAAAN"
+        "SURBVBjTY2AYBdQEAAFQAAGn4toWAAAAAElFTkSuQmCC"
+    )
+
+DEFAULT_DEV_ZIM_METADATA = {
+    "Name": "Test Name",
+    "Title": "Test Title",
+    "Creator": "Test Creator",
+    "Publisher": "Test Publisher",
+    "Date": "2023-01-01",
+    "Description": "Test Description",
+    "Language": "fra",
+}
+
+class StaticItem(libzim.writer.Item):
+    def __init__(self, **kwargs):
+        super().__init__()
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    def get_path(self) -> str:
+        return getattr(self, "path", "")
+
+    def get_title(self) -> str:
+        return getattr(self, "title", "")
+
+    def get_mimetype(self) -> str:
+        return getattr(self, "mimetype", "")
+
+    def get_contentprovider(self) -> libzim.writer.ContentProvider:
+        return StringProvider(content=getattr(self, "content", ""))
+
+    def get_hints(self) -> dict[Hint, int]:
+        return getattr(self, "hints", {Hint.FRONT_ARTICLE: False})
 
 parser = argparse.ArgumentParser()
 parser.add_argument('output_file_path')
@@ -22,14 +62,20 @@ def format_int(n, digits):
 
 def generate_zim_file(filepath, redirect_count):
     digits = len(str(redirect_count-1))
-    with Creator(Path(filepath), main_path="home", compression=None).config_dev_metadata().config_indexing(False, "eng") as creator:
-        creator.add_item_for("home", "Home", content="Hello world", mimetype="text/plain")
+    creator = Creator(filepath)
+    creator.config_indexing(False, "eng")
+    with creator:
+        creator.add_illustration(48, DEFAULT_ILLUSTRATION)
+        for name, value in DEFAULT_DEV_ZIM_METADATA.items():
+            creator.add_metadata(name, value)
+        creator.add_item(StaticItem(path="home", title="Home", content="Hello world", mimetype="text/plain"))
+        creator.set_mainpath("home")
 
         for num in range(redirect_count):
             if num % 1000000 == 0:
                 print(num)
             formatted_num = format_int(num, digits)
-            creator.add_redirect(f"r_{formatted_num}", "home", f"Redirect {formatted_num}", is_front=False)
+            creator.add_redirection(f"r_{formatted_num}", f"Redirect {formatted_num}", "home", {Hint.FRONT_ARTICLE : False})
 
 def redirect_dirent_bytes(k):
     k = bytes(k, 'ascii')
