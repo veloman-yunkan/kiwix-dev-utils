@@ -64,6 +64,7 @@ def generate_zim_file(filepath, redirect_count):
     digits = len(str(redirect_count-1))
     creator = Creator(filepath)
     creator.config_indexing(False, "eng")
+    creator.config_verbose(True)
     with creator:
         creator.add_illustration(48, DEFAULT_ILLUSTRATION)
         for name, value in DEFAULT_DEV_ZIM_METADATA.items():
